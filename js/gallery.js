@@ -65,6 +65,8 @@ const images = [
 ];
 
 const listOfImages = document.querySelector(".gallery");
+const body = document.querySelector('body');
+let modal;
 
 listOfImages.addEventListener("click", onListClick);
 
@@ -72,26 +74,42 @@ function onListClick(e) {
   e.preventDefault();
   if (e.target === e.currentTarget) return;
 
-  const instance = basicLightbox.create(`
+  modal = basicLightbox.create(`
     <div class="modal">
         <img src="${e.target.dataset.source}" alt="${e.target.alt}" />
     </div>
-`);
-
-  instance.show();
+`,
+{
+  onShow: () => {
+    document.addEventListener("keydown", onEscClick);
+    body.style.overflow = "hidden";
+  },
+  onClose: () => {
+    document.removeEventListener("keydown", onEscClick);
+    body.style.overflow = "visible";
+  }
+}
+)
+ 
+  modal.show();
 }
 
-function imageTemplate(imgObj) {
+function onEscClick(e){
+  if(e.code !== "Escape") return;
+  modal.close();
+}
+
+function imageTemplate({original, preview, description}) {
   return `
     <li class="gallery-item">
-  <a class="gallery-link" href="${imgObj.original}">
+  <a class="gallery-link" href="${original}">
     <img
       width="360"
       height="200"
       class="gallery-image"
-      src="${imgObj.preview}"
-      data-source="${imgObj.original}"
-      alt="${imgObj.description}"
+      src="${preview}"
+      data-source="${original}"
+      alt="${description}"
     />
   </a>
 </li>
